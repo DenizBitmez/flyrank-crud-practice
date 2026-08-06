@@ -22,12 +22,12 @@ def read_health():
         "status": "ok"
     }
 
-@app.get("/tasks")
+@app.get("/tasks", summary="Get all tasks")
 def get_tasks():
     return tasks;
 
-@app.get("/tasks/{task_id}")
-def get_byid_tasks(task_id:int):
+@app.get("/tasks/{task_id}", summary="Get tasks by id")
+def get_task(task_id:int):
     for task in tasks:
         if(task["id"])==task_id:
             return task
@@ -39,7 +39,7 @@ class TaskCreate(BaseModel):
     title:str
 
 
-@app.post("/tasks",status_code=201)
+@app.post("/tasks",status_code=201,summary="Create tasks")
 def create_task(taskData:TaskCreate):
     if not taskData.title or taskData.title.strip() == "":
         raise HTTPException(status_code=400, detail={"error": "Title is required"})
@@ -52,14 +52,14 @@ def create_task(taskData:TaskCreate):
         "done":False
     }
 
-    task.append(new_task)
+    tasks.append(new_task)
     return new_task
 
 class TaskUpdate(BaseModel):
     title:str | None=None
     done:bool | None=None
 
-@app.put("/tasks/{task_id}")
+@app.put("/tasks/{task_id}",summary="Update tasks")
 def update_task(task_id:int, task_data:TaskUpdate):
     for task in tasks:
         if task["id"] == task_id:
@@ -74,7 +74,7 @@ def update_task(task_id:int, task_data:TaskUpdate):
 
     raise HTTPException(status_code=404, detail={"error": f"Task {task_id} not found"})
 
-@app.delete("/tasks/{task_id}", status_code=204)
+@app.delete("/tasks/{task_id}", status_code=204, summary="Delete tasks")
 def delete_task(task_id: int):
     for index, task in enumerate(tasks):
         if task["id"] == task_id:
