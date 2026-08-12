@@ -1,0 +1,29 @@
+import sqlite3
+
+conn=sqlite3.connect("tasks.db")
+cursor=conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS tasks(
+    id INTEGER PRIMARY KEY INCREMENT,
+    title TEXT NOT NULL,
+    done BOOLEAN NOT NULL DEFAULT 0
+)
+
+""")
+
+cursor.execute("SELECT COUNT(*) FROM tasks")
+count=cursor.fetchone()[]
+
+if count==0:
+    cursor.executemany(
+        "INSERT INTO tasks (title,done) VALUES(?,?)",
+        [
+            ("Buy milk", 0),
+            ("Learn FastAPI & SQLite", 0),
+            ("Build a persistent CRUD API", 0)
+        ]
+    )
+
+    conn.commit()
+conn.close()
