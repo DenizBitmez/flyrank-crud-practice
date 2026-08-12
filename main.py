@@ -1,12 +1,39 @@
 from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
+import sqlite3
 app = FastAPI()
 
-tasks=[
-    {"id":1,"title":"Buy Milk","done":False},
-    {"id": 2, "title": "Learn FastAPI", "done": True},
-    {"id": 3, "title": "Commit to GitHub", "done": False}
-]
+DB_NAME = "tasks.db"
+
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            done BOOLEAN NOT NULL DEFAULT 0
+        )
+    """)
+    
+    cursor.execute("SELECT COUNT(*) FROM tasks")
+    count = cursor.fetchone()[0]
+    if count == 0:
+        cursor.executemany(
+            "INSERT INTO tasks (title, done) VALUES (?, ?)",
+            [
+                ("Buy milk", 0),
+                ("Learn FastAPI & SQLite", 0),
+                ("Build a persistent CRUD API", 0)
+            ]
+        )
+        conn.commit()
+    
+    conn.close()
+
+init_db()
+
 @app.get("/")
 def read_root():
     return {
@@ -24,15 +51,26 @@ def read_health():
 
 @app.get("/tasks", summary="Get all tasks")
 def get_tasks():
-    return tasks;
+    conn=sqlite3.connect("tasks.db")
+    conn.row_factory=sqlite3.Row
+    cursor=conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    rows=cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
 
 @app.get("/tasks/{task_id}", summary="Get tasks by id")
-def get_task(task_id:int):
-    for task in tasks:
-        if(task["id"])==task_id:
-            return task
-
-        raise HTTPException(status_code=404, detail={"error": f"Task {task_id} not found"})
+def get_task(id:int):
+    conn=sqlite3.connect("tasks.db")
+    conn.row_factory=sqlite3.Row
+    cursor=conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE id = ?")
+    row=cursor.fetchall()
+    conn.close()
+    if row is None:
+        raise HTTPException(status_code=404, detail={"error": "Task not found"})
+    return dict(row)
 
 
 class TaskCreate(BaseModel):
