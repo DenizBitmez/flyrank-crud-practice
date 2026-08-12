@@ -52,15 +52,23 @@ pip install fastapi uvicorn pydantic
 
 ```
 
+4. **SQL by Hand - Example Query**
+I used DB Browser for SQLite to interact with the database directly.
+```bash
+SELECT COUNT(*) FROM tasks;
 
-4. **Run the development server:**
+```
+Result Description: This query returned the total count of rows present in the tasks table (e.g., 3), confirming the persistence of the seeded data.
+
+
+5. **Run the development server:**
 ```bash
 uvicorn main:app --reload
 
 ```
 
 
-5. **Access the API:**
+6. **Access the API:**
 * Open your browser and navigate to: `http://127.0.0.1:8000`
 * Interactive Swagger UI documentation: `http://127.0.0.1:8000/docs`
 
@@ -71,5 +79,6 @@ uvicorn main:app --reload
 * [x] **Stage 0 & 1:** Server setup, root welcome message, and health check endpoint.
 * [x] **Stage 2:** In-memory dataset and read endpoints (`GET /tasks`, `GET /tasks/{id}`).
 * [x] **Stage 3:** Create functionality (`POST /tasks`) with validation.
-* [x] **Stage 4:** Update & Delete functionality (`PUT /tasks/{id}`, `DELETE /tasks/{id}`).
-* [x] **Stage 5:** Interactive Swagger UI documentation tested.
+* [x] **Stage 4:** Database setup with SQLite and automatic seeding.
+* [x] **Stage 5:** Update & Delete functionality (`PUT /tasks/{id}`, `DELETE /tasks/{id}`).
+* [x] **Stage 6:** Interactive Swagger UI documentation tested.
