@@ -155,3 +155,19 @@ def delete_task(id: int):
     conn.commit()
     conn.close()
     return
+
+@app.get("/stats")
+def get_stats():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM tasks")
+    total = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM tasks WHERE done = 1")
+    done_count = cursor.fetchone()[0]
+    
+    open_count = total - done_count
+    conn.close()
+    
+    return {"total": total, "done": done_count, "open": open_count}
