@@ -78,19 +78,26 @@ class TaskCreate(BaseModel):
 
 
 @app.post("/tasks",status_code=201,summary="Create tasks")
-def create_task(taskData:TaskCreate):
-    if not taskData.title or taskData.title.strip() == "":
-        raise HTTPException(status_code=400, detail={"error": "Title is required"})
-
-    new_id=tasks[-1]["id"] +1 if tasks else 1
-
-    new_task= {
-        "id":new_id,
-        "title":taskData.title,
-        "done":False
-    }
-
-    tasks.append(new_task)
+def create_task(task_data: TaskCreate):
+    if not task_data.title or task_data.title.strip() == "":
+        raise HTTPException(status_code=400, detail={"error": "Title cannot be empty"})
+    
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (task_data.title.strip(), 0)
+    )
+    conn.commit()
+    
+    new_id = cursor.lastrowid
+    
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (new_id,))
+    new_task = dict(cursor.fetchone())
+    conn.close()
+    
     return new_task
 
 class TaskUpdate(BaseModel):
